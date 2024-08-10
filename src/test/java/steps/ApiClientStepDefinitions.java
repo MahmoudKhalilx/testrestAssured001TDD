@@ -1,5 +1,6 @@
 package steps;
 
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -16,8 +17,13 @@ import java.util.List;
 import static io.restassured.RestAssured.given;
 
 public class ApiClientStepDefinitions {
+//    private ApiClientRequest request;
+//    private Response response;
+
     private ApiClientRequest request;
     private Response response;
+    private String accessToken;
+    private int bookId;
 
     @Given("I have a new API client request ClientName {string} and ClientEmail {string}")
     public void iHaveANewAPIClientRequestClientNameAndClientEmail(String ClientName, String ClientEmail) {
@@ -69,7 +75,9 @@ public class ApiClientStepDefinitions {
     public void the_response_should_contain_a_list_of_non_fiction_books(String type) {
         List<Book> books = response.jsonPath().getList("", Book.class);
         Assert.assertFalse(books.isEmpty(), "The list of books should not be empty");
-        books.forEach(book -> Assert.assertEquals(book.getType(),  type, "All books should be non-fiction"));
+        books.forEach(book -> {
+            Assert.assertEquals(book.getType(), type, "All books should be " + type);
+        });
     }
 
 
@@ -89,10 +97,22 @@ public class ApiClientStepDefinitions {
     @Then("the response should contain details of the requested book")
     public void the_response_should_contain_details_of_the_requested_book() {
         Book book = response.as(Book.class);
-        Assert.assertNotNull(book, "Book should not be null");
-        Assert.assertEquals(book.getId(), 1, "Book ID should be 1");
-        Assert.assertNotNull(book.getName(), "Book name should not be null");
-        Assert.assertNotNull(book.getType(), "Book type should not be null");
+
+            Assert.assertNotNull(book, "Book should not be null");
+            Assert.assertEquals(book.getId(), 1, "Book ID should be 1");
+            Assert.assertNotNull(book.getName(), "Book name should not be null");
+            Assert.assertNotNull(book.getAuthor(), "Book author should not be null");
+            Assert.assertNotNull(book.getType(), "Book type should not be null");
+        Assert.assertFalse(book.getName().isEmpty(), "Book name should not be empty");
+        Assert.assertFalse(book.getAuthor().isEmpty(), "Book author should not be empty");
+        Assert.assertFalse(book.getType().isEmpty(), "Book type should not be empty");
+
+
     }
 
+    @Then("I store the access token from the response")
+    public void i_store_the_access_token_from_the_response() {
+        accessToken = response.jsonPath().getString("accessToken");
+        Assert.assertNotNull(accessToken, "Access token should not be null");
+    }
 }
