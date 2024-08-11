@@ -187,8 +187,7 @@ public class ApiClientStepDefinitions {
 
     @And("the response should contain orders details")
     public void theResponseShouldContainOrdersDetails() {
-        List<Map<String, Object>> orders = response.jsonPath().getList("");
-        Assert.assertFalse(orders.isEmpty(), "Orders list should not be empty");
+
 //        orders.forEach(order -> {
 //            Assert.assertNotNull(order.get("id"), "Order ID should not be null");
 //            Assert.assertNotNull(order.get("StoredOrderId"), "Book ID should not be null");
@@ -198,22 +197,53 @@ public class ApiClientStepDefinitions {
 //            Assert.assertNotNull(order.get("timestamp"), "Timestamp should not be null");
 //        });
 
+
         response.prettyPrint();
 
-        String StoredOrderId = response.jsonPath().getString("[0].id");  // Accessing the ID of the first book in the array
-        System.out.println("Stored Book ID: " + StoredOrderId);
+
+    }
+
+    @Then("I store the first order id")
+    public void i_store_the_first_order_id() {
+        List<Map<String, Object>> orders = response.jsonPath().getList("");
+        Assert.assertFalse(orders.isEmpty(), "Orders list should not be empty");
+        storedOrderId = (String) orders.get(0).get("id");
+        Assert.assertNotNull(storedOrderId, "Stored order ID should not be null");
     }
 
 
 
     @Then("I send a GET request to get order with selected id")
     public void iSendAGETRequestToGetOrderWithSelectedId() {
-        
+        response = given()
+                .auth().oauth2(storedAccessToken)
+                .when()
+                .get("/orders/" + storedOrderId);
     }
 
-    @When("I send a {string} request to {string} the order")
-    public void iSendAPatchDeleteRequestToUpdateTheOrder() {
-    }
+//    @When("I send a {string} request to {string} the order")
+////    public void iSendAPatchDeleteRequestToUpdateTheOrder() {
+//    public void i_send_a_request_to_the_order(String requestType, String action) {
+//            switch (requestType.toLowerCase()) {
+//                case "patch":
+//                    Map<String, String> updateRequest = Map.of("customerName", "Fred Abbott");
+//                    response = given()
+//                            .auth().oauth2(storedAccessToken)
+//                            .contentType("application/json")
+//                            .body(updateRequest)
+//                            .when()
+//                            .patch("/orders/" + storedOrderId);
+//                    break;
+//                case "delete":
+//                    response = given()
+//                            .auth().oauth2(storedAccessToken)
+//                            .when()
+//                            .delete("/orders/" + storedOrderId);
+//                    break;
+//                default:
+//                    throw new IllegalArgumentException("Unsupported request type: " + requestType);
+//            }
+//    }
 
     @And("the response should contain orders details without deleted order")
     public void theResponseShouldContainOrdersDetailsWithoutDeletedOrder() {
