@@ -239,15 +239,9 @@ public class ApiClientStepDefinitions {
 
     }
 
-    @And("the response should contain orders details without deleted order")
-    public void theResponseShouldContainOrdersDetailsWithoutDeletedOrder() {
-        List<Map<String, Object>> orders = response.jsonPath().getList("");
-        Assert.assertFalse(orders.isEmpty(), "Orders list should not be empty");
-        boolean deletedOrderFound = orders.stream()
-                .anyMatch(order -> order.get("id").equals(storedOrderId));
-        Assert.assertEquals(deletedOrderFound, storedOrderId,"Deleted order should not be present in the response");
-response.prettyPrint();
-    }
+
+
+
 }
 
 

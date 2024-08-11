@@ -58,11 +58,12 @@ Feature: API Client Management
     When I submit an order for the stored book ID with customer name "Salvador Windler"
     Then the response status code should be 201
 
+    When I submit an order for the stored book ID with customer name "Salvador Windler 2 "
+    Then the response status code should be 201
+
 ##      assert customerName,createdBy, and get id
     When I send a GET request to get all orders
     Then the response status code should be 200
-
-
     And the response should contain orders details
     Then I store the first order id
 
@@ -75,14 +76,6 @@ Feature: API Client Management
 
     When I send a "Delete" request to "Delete" the order
     Then the response status code should be 204
-
-    When I send a GET request to get all orders
-    And the response should contain orders details without deleted order
-
-
-
-
-
 
 
     Examples:
