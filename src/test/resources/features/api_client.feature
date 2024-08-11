@@ -65,24 +65,19 @@ Feature: API Client Management
 
     And the response should contain orders details
     Then I store the first order id
-#
+
     Then I send a GET request to get order with selected id
     And the response should contain orders details
 
 
-#    When I send a "Patch" request to "update" the order
-#    Then the response status code should be 204
+    When I send a "Patch" request to "update" the order
+    Then the response status code should be 204
 
-#    When I send a "Delete" request to "Delete" the order
-#    Then the response status code should be 204
+    When I send a "Delete" request to "Delete" the order
+    Then the response status code should be 204
 
-#    When I send a GET request to get all orders
-#    And the response should contain orders details without deleted order
-
-
-
-
-
+    When I send a GET request to get all orders
+    And the response should contain orders details without deleted order
 
 
 
@@ -94,5 +89,3 @@ Feature: API Client Management
       |Type|
       |fiction|
       |non-fiction|
-
-
