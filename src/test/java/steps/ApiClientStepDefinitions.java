@@ -11,19 +11,17 @@ import steps.POJO.BodyModeling.ApiClient.ApiClientRequest;
 import steps.POJO.BodyModeling.ApiClient.ApiClientResponse;
 import steps.POJO.BodyModeling.Book.Book;
 
-import javax.swing.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 
 public class ApiClientStepDefinitions {
-//    private ApiClientRequest request;
-//    private Response response;
+
 
     private ApiClientRequest request;
     private Response response;
-    private String accessToken;
-    private int bookId;
 
     @Given("I have a new API client request ClientName {string} and ClientEmail {string}")
     public void iHaveANewAPIClientRequestClientNameAndClientEmail(String ClientName, String ClientEmail) {
@@ -60,7 +58,6 @@ public class ApiClientStepDefinitions {
 
     //  Scenario: Get List of Books by type
 
-   // private Response booksResponse;
 
     @When("I send a GET request to fetch {string} books")
     public void iSendAGETRequestToFetchBooks(String type) {
@@ -99,7 +96,7 @@ public class ApiClientStepDefinitions {
         Book book = response.as(Book.class);
 
             Assert.assertNotNull(book, "Book should not be null");
-            Assert.assertEquals(book.getId(), 1, "Book ID should be 1");
+            Assert.assertEquals(book.getId(), getStoredBookId(), "Book ID should be 1");
             Assert.assertNotNull(book.getName(), "Book name should not be null");
             Assert.assertNotNull(book.getAuthor(), "Book author should not be null");
             Assert.assertNotNull(book.getType(), "Book type should not be null");
@@ -112,7 +109,116 @@ public class ApiClientStepDefinitions {
 
     @Then("I store the access token from the response")
     public void i_store_the_access_token_from_the_response() {
-        accessToken = response.jsonPath().getString("accessToken");
-        Assert.assertNotNull(accessToken, "Access token should not be null");
+        storedAccessToken = response.jsonPath().getString("accessToken");
+        Assert.assertNotNull(storedAccessToken, "Access token should not be null");
+        System.out.println("Stored access token: " + storedAccessToken);  // For debugging
+    }
+
+
+
+    private int storedBookId;
+    private String storedAccessToken;
+    private String storedOrderId;
+
+    public String getStoredAccessToken() {
+        return storedAccessToken;
+    }
+
+    public int getStoredBookId() {
+        return storedBookId;
+    }
+
+    public String getStoredOrderId() {
+        return storedOrderId;
+    }
+
+    @Then("I store the book ID")
+        public void i_store_the_book_id() {
+            List<Map<String, Object>> books = response.jsonPath().getList("");
+            Assert.assertFalse(books.isEmpty(), "The list of books should not be empty");
+
+            storedBookId = (Integer) books.get(0).get("id");
+            Assert.assertTrue(storedBookId > 0, "Stored book ID should be greater than 0");
+            System.out.println("Stored book ID: " + storedBookId);  // For debugging
+        }
+
+
+
+    @When("I sent the book ID")
+    public void i_sent_the_book_id() {
+        System.out.println(getStoredBookId());
+    }
+
+    @When("I send a GET request to fetch book with ID")
+    public void iSendAGetRequestToFetchBookWitId() {
+        response = given()
+                .when()
+                .get("/books/" + getStoredBookId());
+    }
+
+    @When("I submit an order for the stored book ID with customer name {string}")
+    public void i_submit_an_order_for_the_stored_book_id_with_customer_name(String customerName) {
+        Assert.assertNotNull(storedAccessToken, "Access token should not be null");
+
+        Map<String, Object> orderRequest = new HashMap<>();
+        orderRequest.put("bookId", storedBookId);
+        orderRequest.put("customerName", customerName);
+
+        response = given()
+                .auth().oauth2(storedAccessToken)
+                .contentType("application/json")
+                .body(orderRequest)
+                .when()
+                .post("/orders");
+
+//        response.prettyPrint();
+//
+//        System.out.println("Order submission response: " + response.asString());  // For debugging
+    }
+
+
+    @When("I send a GET request to get all orders")
+    public void iSendAGETRequestToGetAllOrders() {
+        response = given()
+                .auth().oauth2(storedAccessToken)
+                .when()
+                .get("/orders/");
+    }
+
+    @And("the response should contain orders details")
+    public void theResponseShouldContainOrdersDetails() {
+        List<Map<String, Object>> orders = response.jsonPath().getList("");
+        Assert.assertFalse(orders.isEmpty(), "Orders list should not be empty");
+//        orders.forEach(order -> {
+//            Assert.assertNotNull(order.get("id"), "Order ID should not be null");
+//            Assert.assertNotNull(order.get("StoredOrderId"), "Book ID should not be null");
+//            Assert.assertNotNull(order.get("customerName"), "Customer name should not be null");
+//            Assert.assertNotNull(order.get("createdBy"), "Created by should not be null");
+//            Assert.assertNotNull(order.get("quantity"), "Quantity should not be null");
+//            Assert.assertNotNull(order.get("timestamp"), "Timestamp should not be null");
+//        });
+
+        response.prettyPrint();
+
+        String StoredOrderId = response.jsonPath().getString("[0].id");  // Accessing the ID of the first book in the array
+        System.out.println("Stored Book ID: " + StoredOrderId);
+    }
+
+
+
+    @Then("I send a GET request to get order with selected id")
+    public void iSendAGETRequestToGetOrderWithSelectedId() {
+        
+    }
+
+    @When("I send a {string} request to {string} the order")
+    public void iSendAPatchDeleteRequestToUpdateTheOrder() {
+    }
+
+    @And("the response should contain orders details without deleted order")
+    public void theResponseShouldContainOrdersDetailsWithoutDeletedOrder() {
     }
 }
+
+
+

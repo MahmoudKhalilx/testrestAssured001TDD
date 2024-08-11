@@ -23,4 +23,5 @@ public class Book {
     public void setType(String type) { this.type = type; }
     public boolean isAvailable() { return available; }
     public void setAvailable(boolean available) { this.available = available; }
+
 }
