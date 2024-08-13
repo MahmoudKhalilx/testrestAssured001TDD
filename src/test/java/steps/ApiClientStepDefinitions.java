@@ -10,10 +10,10 @@ import org.testng.Assert;
 import steps.POJO.BodyModeling.ApiClient.ApiClientRequest;
 import steps.POJO.BodyModeling.ApiClient.ApiClientResponse;
 import steps.POJO.BodyModeling.Book.Book;
+import steps.POJO.BodyModeling.Book.Order;
+import steps.POJO.BodyModeling.Book.OrderRequest;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 
@@ -134,10 +134,10 @@ public class ApiClientStepDefinitions {
 
     @Then("I store the book ID")
         public void i_store_the_book_id() {
-            List<Map<String, Object>> books = response.jsonPath().getList("");
+            List<Book> books = response.jsonPath().getList("", Book.class);
             Assert.assertFalse(books.isEmpty(), "The list of books should not be empty");
 
-            storedBookId = (Integer) books.get(0).get("id");
+            int storedBookId = books.get(0).getId();
             Assert.assertTrue(storedBookId > 0, "Stored book ID should be greater than 0");
             System.out.println("Stored book ID: " + storedBookId);  // For debugging
         }
@@ -160,9 +160,12 @@ public class ApiClientStepDefinitions {
     public void i_submit_an_order_for_the_stored_book_id_with_customer_name(String customerName) {
         Assert.assertNotNull(storedAccessToken, "Access token should not be null");
 
-        Map<String, Object> orderRequest = new HashMap<>();
-        orderRequest.put("bookId", storedBookId);
-        orderRequest.put("customerName", customerName);
+//        Map<String, Object> orderRequest = new HashMap<>();
+//        orderRequest.put("bookId", storedBookId);
+//        orderRequest.put("customerName", customerName);
+
+        OrderRequest orderRequest = new OrderRequest(storedBookId, customerName);
+
 
         response = given()
                 .auth().oauth2(storedAccessToken)
@@ -194,9 +197,13 @@ public class ApiClientStepDefinitions {
 
     @Then("I store the first order id")
     public void i_store_the_first_order_id() {
-        List<Map<String, Object>> orders = response.jsonPath().getList("");
+//        List<Map<String, Object>> orders = response.jsonPath().getList("");
+//        Assert.assertFalse(orders.isEmpty(), "Orders list should not be empty");
+//        storedOrderId = (String) orders.get(0).get("id");
+
+        List<Order> orders = response.jsonPath().getList("", Order.class);
         Assert.assertFalse(orders.isEmpty(), "Orders list should not be empty");
-        storedOrderId = (String) orders.get(0).get("id");
+        storedOrderId = orders.get(0).getId();
         Assert.assertNotNull(storedOrderId, "Stored order ID should not be null");
     }
 
